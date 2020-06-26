@@ -35,6 +35,11 @@ def play():
     pygame.mixer.music.set_volume(volume.get())
 
 
+def changeVolume(a):
+    a = volume.get()
+    pygame.mixer.music.set_volume(a)
+
+
 var = tkp.StringVar()
 musictitle=tkp.Label(player,textvariable=var)
 musictitle.pack()
@@ -49,5 +54,8 @@ btnload.pack(fill="x")
 btnplay = tkp.Button(player, text="play", command=play)     #making the botton
 btnplay.pack(fill='x')       #showing the botton
 
+#volume
+volume = tkp.Scale(player, from_= 0, to_= 1, resolution= 0.1,  orient=tkp.HORIZONTAL, command=changeVolume )
+volume.pack()
 
 player.mainloop()               #for showing the main window
