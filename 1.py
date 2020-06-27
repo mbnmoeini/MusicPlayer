@@ -37,6 +37,20 @@ def add_to_playlist(filename):
     index += 1
 
 
+def Load():
+    #for inserting a whole playlist from a folder path
+    directory = askdirectory()    #set the dir
+    os.chdir(directory)
+    musiclist = os.listdir(directory)   #listing the music content
+    for item in musiclist:
+        filename = os.path.basename(item)
+        if item.endswith('.mp3') or item.endswith('.wav'):
+            i = 0
+            playlistbox.insert(i, filename)
+            playlist.insert(i, item)
+            i += 1
+
+
 def play_music():
     global paused
 
@@ -120,6 +134,8 @@ playlistbox.pack()
 addBtn = ttk.Button(leftframe, text="+ Add Song", command=browse_file)
 addBtn.pack(side=LEFT)
 
+btnload = ttk.Button(leftframe, text="select folder", command=Load)
+btnload.pack(side=LEFT)
 
 rightframe = Frame(root)
 rightframe.pack(pady=30)
