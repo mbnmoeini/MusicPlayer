@@ -106,6 +106,45 @@ def Load():
             i += 1
 
 
+def show_details(play_song):
+    file_data = os.path.splitext(play_song)
+
+    if file_data[1] == '.mp3':
+        audio = MP3(play_song)
+        total_length = audio.info.length
+    else:
+        a = mixer.Sound(play_song)
+        total_length = a.get_length()
+
+    # div - total_length/60, mod - total_length % 60
+    mins, secs = divmod(total_length, 60)
+    mins = round(mins)
+    secs = round(secs)
+    timeformat = '{:02d}:{:02d}'.format(mins, secs)
+    lengthlabel['text'] = "Total Length" + ' - ' + timeformat
+
+    t1 = threading.Thread(target=start_count, args=(total_length,))
+    t1.start()
+
+
+def start_count(t):
+    global paused
+    # mixer.music.get_busy(): - Returns FALSE when we press the stop button (music stop playing)
+    # Continue - Ignores all of the statements below it. We check if music is paused or not.
+    current_time = 0
+    while current_time <= t and mixer.music.get_busy():
+        if paused:
+            continue
+        else:
+            mins, secs = divmod(current_time, 60)
+            mins = round(mins)
+            secs = round(secs)
+            timeformat = '{:02d}:{:02d}'.format(mins, secs)
+            currenttimelabel['text'] = "Current Time" + ' - ' + timeformat
+            time.sleep(1)
+            current_time += 1
+
+
 def mute_music():
     global muted
     if muted:  # Unmute the music
@@ -172,6 +211,13 @@ rightframe.pack(pady=30)
 
 topframe = Frame(rightframe)
 topframe.pack()
+
+lengthlabel = ttk.Label(topframe, text='Total Length : --:--')
+lengthlabel.pack(pady=5)
+
+currenttimelabel = ttk.Label(topframe, text='Current Time : --:--', relief=GROOVE)
+currenttimelabel.pack()
+
 
 middleframe = Frame(rightframe)
 middleframe.pack(pady=30, padx=30)
