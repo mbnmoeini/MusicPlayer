@@ -1,114 +1,161 @@
-import tkinter as tkp
-import os
+import os, threading, time
+import tkinter.messagebox
 from tkinter import *
+from tkinter import filedialog
 from tkinter.filedialog import askdirectory   #To specify the dir of your playlist
-import time
-from tinytag import *
-import threading
+from tkinter import ttk
+from ttkthemes import themed_tk as tk
+from mutagen.mp3 import MP3
 from pygame import mixer
 
 
-#Main window
-player = tkp.Tk()                #building the main window
-player.title('Music player')
-player.geometry("500x500")      #size !
-player.configure(background='peachpuff')
 
+root = tk.ThemedTk()
+root.set_theme("black")         # Sets an available theme
 
-mixer.init()  # initializing the mixer
-
-
+#vars
+muted = FALSE
 paused = FALSE
+playlist = []     #contains the full path + filename
+filename_path =''
+# playlistbox - contains just the filename
+# Fullpath + filename is required to play the music inside play_music load function
+
+def browse_file():
+    global filename_path
+    filename_path = filedialog.askopenfilename()
+    add_to_playlist(filename_path)
+
+    mixer.music.queue(filename_path)
 
 
-playlistbox = tkp.Listbox()
+def add_to_playlist(filename):
+    filename = os.path.basename(filename)
+    index = 0
+    playlistbox.insert(index, filename)
+    playlist.insert(index, filename_path)
+    index += 1
 
-def play():
+
+def play_music():
     global paused
+
     if paused:
         mixer.music.unpause()
+        statusbar['text'] = "Music Resumed"
         paused = FALSE
     else:
-        mixer.music.load(playlistbox.get(tkp.ACTIVE))
-        show_detail(playlistbox.get(tkp.ACTIVE)) #for showing music metadata
-        var.set(playlistbox.get(tkp.ACTIVE))
-        mixer.music.play()
-        mixer.music.set_volume(volume.get())
+        try:
+            stop_music()
+            time.sleep(1)
+            selected_song = playlistbox.curselection()
+            selected_song = int(selected_song[0])
+            play_it = playlist[selected_song]
+            mixer.music.load(play_it)
+            mixer.music.play()
+            statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
+            show_details(play_it)
+        except:
+            tkinter.messagebox.showerror('File not found', 'Please check again.')
 
 
-def stop():
+def stop_music():
     mixer.music.stop()
+    statusbar['text'] = "Music Stopped"
 
 
-def pause():
+def pause_music():
     global paused
     paused = TRUE
     mixer.music.pause()
+    statusbar['text'] = "Music Paused"
 
 
-def changeVolume(a):
-    a = volume.get()
-    mixer.music.set_volume(a)
+def rewind_music():
+    play_music()
+    statusbar['text'] = "Music Rewinded"
 
 
-def Load():
-    #set the dir
-    directory = askdirectory()
-    os.chdir(directory)
-    musiclist = os.listdir(directory)   #listing the music content
-    for item in musiclist:
-        if item.endswith('.mp3') or item.endswith('.wav'):
-            i = 0
-            playlistbox.insert(i, item)
-            i += 1
-
-
-def show_detail(playing_song):
-    item = TinyTag.get(playing_song)
-    total_length = item.duration
-    mins, secs = divmod(total_length, 60)        # div - total_length/60, mod - total_length % 60
-    mins = round(mins)
-    secs = round(secs)
-    timeformat = '{:02d}:{:02d}'.format(mins, secs)
-
-    lengthlabel = tkp.Label(player, text='Total Length : --:--')
-    lengthlabel.grid(row=8, column=0)
-    lengthlabel['text'] = "Total Length" + ' - ' + timeformat
-
-    tag1 = item.filesize/(10**6)
-    sizelabel = tkp.Label(player, text='size :  {} Mb'.format(tag1))
-    sizelabel.grid(row = 9, column = 0)
+def set_vol(val):
+    volume = float(val) / 100
+    mixer.music.set_volume(volume)
 
 
 
-#bottons
-btnload=tkp.Button(player, text="select folder", command=Load, background = "rosybrown2")
-btnload.grid(row = 1, padx =120, ipadx = 50)
+def mute_music():
+    global muted
+    if muted:  # Unmute the music
+        mixer.music.set_volume(0.7)
+        scale.set(70)
+        muted = FALSE
+    else:  # mute the music
+        mixer.music.set_volume(0)
+        scale.set(0)
+        muted = TRUE
 
-playlistbox.grid(row=2, padx= 150, ipadx = 50)
-
-btnplay = tkp.Button(player, text="play", command=play, background="lightcyan2")     #making the botton
-btnplay.grid(row = 3, sticky = N+S+E+W)      #showing the botton
-
-btnstop = tkp.Button(player, text="Stop", command=stop,  background="lightcyan3")
-btnstop.grid(row = 4, sticky = N+S+E+W)
-
-btnpause = tkp.Button(player, text='Pause', command=pause,  background="lightcyan2")
-btnpause.grid(row = 5, sticky = N+S+E+W)
-
-#volume
-volume = tkp.Scale(player, from_= 0, to_= 1, resolution= 0.1,  orient=tkp.HORIZONTAL, command=changeVolume, background='mediumpurple1' )
-volume.grid(row = 6, padx = 150, pady = 10)
+def on_closing():
+    stop_music()
+    root.destroy()
 
 
-#music name
-var = tkp.StringVar()
-musictitle=tkp.Label(player,textvariable=var)
-musictitle.grid(row = 7, padx = 200)
+##########designing widgets#############
+
+statusbar = ttk.Label(root, text="Welcome to Music Player", relief=SUNKEN, anchor=W, font='Times 10 italic')
+statusbar.pack(side=BOTTOM, fill=X)
+
+mixer.init()  # initializing the mixer
+
+root.title("Music player")
+
+# Root Window - StatusBar, LeftFrame, RightFrame
+# LeftFrame - The listbox (playlist)
+# RightFrame - TopFrame,MiddleFrame and the BottomFrame
+
+leftframe = Frame(root)
+leftframe.pack(side=LEFT, padx=30, pady=30)
+
+playlistbox = Listbox(leftframe, bg = 'mistyrose2')
+playlistbox.pack()
+
+addBtn = ttk.Button(leftframe, text="+ Add Song", command=browse_file)
+addBtn.pack(side=LEFT)
 
 
+rightframe = Frame(root)
+rightframe.pack(pady=30)
+
+topframe = Frame(rightframe)
+topframe.pack()
 
 
+middleframe = Frame(rightframe)
+middleframe.pack(pady=30, padx=30)
+
+playBtn = ttk.Button(middleframe, text='Play', command=play_music)
+playBtn.grid(row=0, column=0, padx=10)
+
+stopBtn = ttk.Button(middleframe, text='Stop', command=stop_music)
+stopBtn.grid(row=0, column=1, padx=10)
+
+pauseBtn = ttk.Button(middleframe, text = 'pause', command=pause_music)
+pauseBtn.grid(row=0, column=2, padx=10)
 
 
-player.mainloop()               #for showing the main window
+bottomframe = Frame(rightframe)
+bottomframe.pack()
+
+rewindBtn = ttk.Button(bottomframe, text='Rewind', command=rewind_music)
+rewindBtn.grid(row=0, column=0)
+
+volumeBtn = ttk.Button(bottomframe, text='Mute', command=mute_music)
+volumeBtn.grid(row=0, column=1)
+
+scale = ttk.Scale(bottomframe, from_=0, to=100, orient=HORIZONTAL, command=set_vol)
+scale.set(70)  # implement the default value of scale when music player starts
+mixer.music.set_volume(0.7)
+scale.grid(row=0, column=2, pady=15, padx=30)
+
+root.protocol("WM_DELETE_WINDOW", on_closing)
+
+
+root.mainloop()
