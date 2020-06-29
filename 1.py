@@ -60,8 +60,11 @@ def play_music():
 
 
 def stop_music():
+    global progress_bar
     mixer.music.stop()
     statusbar['text'] = "Music Stopped"
+    progress_bar['value'] = 0.0
+    progress_bar.update()
 
 
 def pause_music():
@@ -108,7 +111,7 @@ def Load():
 
 def show_details(play_song):
     file_data = os.path.splitext(play_song)
-
+    global progress_bar
     if file_data[1] == '.mp3':
         audio = MP3(play_song)
         total_length = audio.info.length
@@ -122,7 +125,7 @@ def show_details(play_song):
     secs = round(secs)
     timeformat = '{:02d}:{:02d}'.format(mins, secs)
     lengthlabel['text'] = "Total Length" + ' - ' + timeformat
-
+    progress_bar['maximum'] = total_length
     t1 = threading.Thread(target=start_count, args=(total_length,))
     t1.start()
 
@@ -142,6 +145,8 @@ def start_count(t):
             timeformat = '{:02d}:{:02d}'.format(mins, secs)
             currenttimelabel['text'] = "Current Time" + ' - ' + timeformat
             time.sleep(1)
+            progress_bar['value'] = current_time
+            progress_bar.update()
             current_time += 1
 
 
@@ -155,6 +160,7 @@ def mute_music():
         mixer.music.set_volume(0)
         scale.set(0)
         muted = TRUE
+
 
 
 def on_closing():
@@ -248,5 +254,10 @@ scale.grid(row=0, column=2, pady=15, padx=30)
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
+#progres bar
+global progress_bar
+progress_bar = ttk.Progressbar(root, orient='horizontal',length=300)
+progress_bar.place(x=100,y=100)
+progress_bar.pack()
 
 root.mainloop()
