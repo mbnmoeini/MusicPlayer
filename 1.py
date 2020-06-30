@@ -126,30 +126,58 @@ def select_PL(track_id):
     detail_label.pack()
 
 ####################
+#Main
 
-
-root = tk.ThemedTk()
-root.set_theme("black")         # Sets an available theme
-
-#vars
-muted = FALSE
+track_id_list =[]
 paused = FALSE
-playlist = []     #contains the full path + filename
+muted = FALSE
+playlist = []       # playlist - contains the full path + filename
 filename_path =''
+index = 0
+t_id = 1
 # playlistbox - contains just the filename
 # Fullpath + filename is required to play the music inside play_music load function
 
 def browse_file():
+    global t_id
+    global index
     global filename_path
     filename_path = filedialog.askopenfilename()
+    if filename_path == '':
+        return
+    t_id = insert_PL(filename_path)  # inserting file URL into DB
+    if t_id == -1:
+        return
+    track_id_list.insert(index, t_id)
     add_to_playlist(filename_path)
-
+    index += 1
     mixer.music.queue(filename_path)
 
 
+def Load():
+    # for inserting a whole playlist from a folder path
+    global index
+
+    directory = askdirectory(title='Choose the folder :')
+    os.chdir(directory)
+    musiclist = os.listdir(directory)  # listing the music content
+    for item in musiclist:
+
+        filename = os.path.basename(item)
+        if item.endswith('.mp3') or item.endswith('.wav'):
+
+            t_id = insert_PL(item)  # inserting into the DB
+            if t_id == -1:
+                continue
+            track_id_list.insert(index, t_id)
+            playlistbox.insert(index, filename)
+            playlist.insert(index, item)
+            index += 1
+
+
 def add_to_playlist(filename):
+    global index
     filename = os.path.basename(filename)
-    index = 0
     playlistbox.insert(index, filename)
     playlist.insert(index, filename_path)
     index += 1
@@ -168,12 +196,16 @@ def play_music():
             time.sleep(1)
             selected_song = playlistbox.curselection()
             selected_song = int(selected_song[0])
-            play_it = playlist[selected_song]
+            play_it = playlist[selected_song]  # plylist gets the index of the selected song and returns its path
+            #######
+
+            select_PL(track_id_list[selected_song])  # reading from the DB
             mixer.music.load(play_it)
             mixer.music.play()
             statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
             show_details(play_it)
-        except:
+        except Exception as e:
+            print(e)
             tkinter.messagebox.showerror('File not found', 'Please check again.')
 
 
@@ -203,7 +235,7 @@ def rewind():
     if x1 - 1 == -1:
         playlistbox.selection_set(len(playlist) - 1)
     else:
-        playlistbox.selection_set(x1-1)
+        playlistbox.selection_set(x1 - 1)
     return x1
 
 
@@ -211,31 +243,42 @@ def forward():
     value = playlistbox.get(playlistbox.curselection())
     x1 = playlistbox.curselection()[0]
     playlistbox.selection_clear(x1)
-    if x1+1==playlistbox.size():
+    if x1 + 1 == playlistbox.size():
         playlistbox.selection_set(0)
     else:
-        playlistbox.selection_set(x1+1)
+        playlistbox.selection_set(x1 + 1)
     return x1
-
 
 def rewind_music():
     stop_music()
     time.sleep(1)
     x1 = rewind()
-    play_it = playlist[x1 - 1]
+    play_it = playlist[(x1 - 1 + len(playlist)) % len(playlist)]
+    if x1 == 0:
+        play_it = playlist[len(playlist) - 1]
+        select_PL(track_id_list[len(playlist) - 1])
+    else:
+        play_it = playlist[x1 - 1]
+        select_PL(track_id_list[x1 - 1])
+
     mixer.music.load(play_it)
     mixer.music.play()
     statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
     show_details(play_it)
 
+
 def forward_music():
     stop_music()
     time.sleep(1)
     x1 = forward()
+    #print(playlist)
+    #print(track_id_list)
     if x1 == (len(playlist) - 1):
         play_it = playlist[0]
+        select_PL(track_id_list[0])
     else:
         play_it = playlist[x1 + 1]
+        select_PL(track_id_list[x1 + 1])
     mixer.music.load(play_it)
     mixer.music.play()
     statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
@@ -252,35 +295,27 @@ def del_song():
     selected_song = int(selected_song[0])
     playlistbox.delete(selected_song)
     playlist.pop(selected_song)
+    track_id_list.pop(selected_song)
 
 
 def about_us():
     tkinter.messagebox.showinfo('About Music Player', 'This is a music player using Python Tkinter by Yasamin and Mobina ;)')
 
 
-def Load():
-    #for inserting a whole playlist from a folder path
-    directory = askdirectory()    #set the dir
-    os.chdir(directory)
-    musiclist = os.listdir(directory)   #listing the music content
-    for item in musiclist:
-        filename = os.path.basename(item)
-        if item.endswith('.mp3') or item.endswith('.wav'):
-            i = 0
-            playlistbox.insert(i, filename)
-            playlist.insert(i, item)
-            i += 1
-
 
 def show_details(play_song):
     file_data = os.path.splitext(play_song)
     global progress_bar
+
     if file_data[1] == '.mp3':
         audio = MP3(play_song)
         total_length = audio.info.length
+    elif file_data[1] == '.wav':
+        audio = WavPack(play_song)
     else:
         a = mixer.Sound(play_song)
         total_length = a.get_length()
+        ##progress_bar['maximum'] = total_length
 
     # div - total_length/60, mod - total_length % 60
     mins, secs = divmod(total_length, 60)
@@ -295,6 +330,7 @@ def show_details(play_song):
 
 def start_count(t):
     global paused
+    global progress_bar
     # mixer.music.get_busy(): - Returns FALSE when we press the stop button (music stop playing)
     # Continue - Ignores all of the statements below it. We check if music is paused or not.
     current_time = 0
@@ -308,9 +344,9 @@ def start_count(t):
             timeformat = '{:02d}:{:02d}'.format(mins, secs)
             currenttimelabel['text'] = "Current Time" + ' - ' + timeformat
             time.sleep(1)
+            current_time += 1
             progress_bar['value'] = current_time
             progress_bar.update()
-            current_time += 1
 
 
 def mute_music():
@@ -331,6 +367,8 @@ def on_closing():
     root.destroy()
 
 
+root = tk.ThemedTk()
+root.set_theme("black")         # Sets an available theme
 ##########designing widgets#############
 
 statusbar = ttk.Label(root, text="Welcome to Music Player", relief=SUNKEN, anchor=W, font='Times 10 italic')
