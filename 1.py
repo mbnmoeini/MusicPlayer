@@ -78,6 +78,25 @@ def restart_music():
     play_music()
     statusbar['text'] = "Music Restarted"
 
+def rewind():
+    value = playlistbox.get(playlistbox.curselection())
+    x1 = playlistbox.curselection()[0]
+    playlistbox.selection_clear(x1)
+    if x1 - 1 == -1:
+        playlistbox.selection_set(len(playlist) - 1)
+    else:
+        playlistbox.selection_set(x1-1)
+    return x1
+
+def rewind_music():
+    stop_music()
+    time.sleep(1)
+    x1 = rewind()
+    play_it = playlist[x1 - 1]
+    mixer.music.load(play_it)
+    mixer.music.play()
+    statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
+    show_details(play_it)
 
 def set_vol(val):
     volume = float(val) / 100
@@ -244,13 +263,18 @@ bottomframe.pack()
 restartBtn = ttk.Button(bottomframe, text='Restart', command=restart_music)
 restartBtn.grid(row=0, column=0)
 
+
+rewindBtn = ttk.Button(bottomframe, text = 'Rewind', command=rewind_music)
+rewindBtn.grid(row=0, column=1)
+
+
 volumeBtn = ttk.Button(bottomframe, text='Mute', command=mute_music)
-volumeBtn.grid(row=0, column=1)
+volumeBtn.grid(row=0, column=2)
 
 scale = ttk.Scale(bottomframe, from_=0, to=100, orient=HORIZONTAL, command=set_vol)
 scale.set(70)  # implement the default value of scale when music player starts
 mixer.music.set_volume(0.7)
-scale.grid(row=0, column=2, pady=15, padx=30)
+scale.grid(row=0, column=3, pady=15, padx=30)
 
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
