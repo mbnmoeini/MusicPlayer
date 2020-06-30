@@ -293,7 +293,7 @@ restartBtn.grid(row=0, column=0)
 rewindBtn = ttk.Button(bottomframe, text = 'Rewind', command=rewind_music)
 rewindBtn.grid(row=0, column=1)
 
-forwardBtn = ttk.Button(bottomframe, image = photo_forward, command=forward_music)
+forwardBtn = ttk.Button(bottomframe, text = 'Forward', command=forward_music)
 forwardBtn.grid(row=0, column=2)
 
 
