@@ -74,9 +74,9 @@ def pause_music():
     statusbar['text'] = "Music Paused"
 
 
-def rewind_music():
+def restart_music():
     play_music()
-    statusbar['text'] = "Music Rewinded"
+    statusbar['text'] = "Music Restarted"
 
 
 def set_vol(val):
@@ -241,8 +241,8 @@ pauseBtn.grid(row=0, column=2, padx=10)
 bottomframe = Frame(rightframe)
 bottomframe.pack()
 
-rewindBtn = ttk.Button(bottomframe, text='Rewind', command=rewind_music)
-rewindBtn.grid(row=0, column=0)
+restartBtn = ttk.Button(bottomframe, text='Restart', command=restart_music)
+restartBtn.grid(row=0, column=0)
 
 volumeBtn = ttk.Button(bottomframe, text='Mute', command=mute_music)
 volumeBtn.grid(row=0, column=1)
