@@ -46,6 +46,52 @@ CREATE TABLE Track (
 ''')
 
 
+def insert_PL(music_path):  #inserting data into the DB
+    tag = TinyTag.get(music_path)
+    name = tag.title
+    t_length = tag.duration
+    mins, secs = divmod(t_length, 60) if not t_length==None else (3,30)
+    mins = round(mins)
+    secs = round(secs)
+    length = '{:02d}:{:02d}'.format(mins, secs)
+    album = tag.album if not tag.album==None else 'nadare'
+    genre = tag.genre if not tag.genre==None else 'nadare'
+    year = tag.year
+    loc = music_path
+
+    if name is None or loc is None  :
+        return -1
+
+
+    cur.execute('''INSERT OR IGNORE INTO Location (loc)
+        VALUES ( ? )''', ( loc, ) )      #the path or URL of music
+    cur.execute('SELECT id FROM Location WHERE loc = ? ', (loc, ))
+    loc_id = cur.fetchone()[0]
+
+    cur.execute('''INSERT OR IGNORE INTO Genre (name)
+        VALUES ( ? )''', ( genre, ) )
+    cur.execute('SELECT id FROM Genre WHERE name = ? ', (genre, ))
+    genre_id = cur.fetchone()[0]
+
+    cur.execute('''INSERT OR IGNORE INTO Album (title)
+        VALUES ( ? )''', ( album, ) )
+    cur.execute('SELECT id FROM Album WHERE title = ? ', (album, ))
+    album_id = cur.fetchone()[0]
+
+    cur.execute('''INSERT OR REPLACE INTO Track
+        (title, album_id, loc_id,genre_id, len, year)
+        VALUES ( ?, ?, ?, ?, ?, ? )''',
+        ( name, album_id, loc_id, genre_id, length, year) )
+
+    cur.execute('SELECT id FROM Track WHERE title = ? ', (name, ))
+    track_id = cur.fetchone()[0]
+
+    conn.commit()
+
+    return track_id
+
+
+
 
 root = tk.ThemedTk()
 root.set_theme("black")         # Sets an available theme
