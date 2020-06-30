@@ -1,1 +1,0 @@
-print('Checking the connection ')
