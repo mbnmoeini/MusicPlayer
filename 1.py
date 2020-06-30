@@ -91,6 +91,41 @@ def insert_PL(music_path):  #inserting data into the DB
     return track_id
 
 
+def select_PL(track_id):
+    if track_id == -1:
+        return
+
+    cur.execute('SELECT title FROM Track WHERE id = ? ', (track_id,))
+    name = cur.fetchone()[0]
+
+    cur.execute('SELECT album_id FROM Track WHERE id = ? ', (track_id,))
+    album_id = cur.fetchone()[0]
+
+    cur.execute('SELECT loc_id FROM Track WHERE id = ? ', (track_id,))
+    loc_id = cur.fetchone()[0]
+
+    cur.execute('SELECT genre_id FROM Track WHERE id = ? ', (track_id,))
+    genre_id = cur.fetchone()[0]
+
+    cur.execute('SELECT len FROM Track WHERE id = ? ', (track_id,))
+    length = cur.fetchone()[0]
+
+    cur.execute('SELECT year FROM Track WHERE id = ? ', (track_id,))
+    year = cur.fetchone()[0]
+
+    cur.execute('SELECT loc FROM Location WHERE id = ? ', (loc_id,))
+    loc = cur.fetchone()[0]
+
+    cur.execute('SELECT name FROM Genre WHERE id = ? ', (genre_id,))
+    genre = cur.fetchone()[0]
+
+    cur.execute('SELECT title FROM Album WHERE id = ? ', (album_id,))
+    album = cur.fetchone()[0]
+
+    detail_label.config(text=u'Meta Data:\n{}, {}, {}, {}, {}'.format(name, genre, album, year, length))
+    detail_label.pack()
+
+####################
 
 
 root = tk.ThemedTk()
@@ -351,6 +386,10 @@ lengthlabel.pack(pady=5)
 
 currenttimelabel = ttk.Label(topframe, text='Current Time : --:--', relief=GROOVE)
 currenttimelabel.pack()
+
+detailframe = Frame(root)
+detailframe.pack(side = TOP)
+detail_label = ttk.Label(detailframe)
 
 
 middleframe = Frame(rightframe)
