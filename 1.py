@@ -250,6 +250,7 @@ def forward():
     return x1
 
 def rewind_music():
+    global progress_bar
     stop_music()
     time.sleep(1)
     x1 = rewind()
@@ -260,7 +261,8 @@ def rewind_music():
     else:
         play_it = playlist[x1 - 1]
         select_PL(track_id_list[x1 - 1])
-
+    progress_bar['value'] = 0.0
+    progress_bar.update()
     mixer.music.load(play_it)
     mixer.music.play()
     statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
@@ -268,6 +270,7 @@ def rewind_music():
 
 
 def forward_music():
+    global progres_bar
     stop_music()
     time.sleep(1)
     x1 = forward()
@@ -279,6 +282,8 @@ def forward_music():
     else:
         play_it = playlist[x1 + 1]
         select_PL(track_id_list[x1 + 1])
+    progress_bar['value'] = 0.0
+    progress_bar.update()
     mixer.music.load(play_it)
     mixer.music.play()
     statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
