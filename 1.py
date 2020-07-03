@@ -10,6 +10,7 @@ from mutagen.wavpack import *
 from pygame import mixer
 import sqlite3
 from tinytag import TinyTag
+from PIL import Image, ImageTk
 from itertools import count
 
 #################
@@ -141,6 +142,43 @@ filename_path =''
 index = 0
 t_id = 1
 
+class ImageLabel(tkinter.Label):
+    """a label that displays images, and plays them if they are gif"""
+    def load(self, im):
+        if isinstance(im, str):
+            im = Image.open(im)
+        self.loc = 0
+        self.frames = []
+
+        try:
+            for i in count(1):
+                self.frames.append(ImageTk.PhotoImage(im.copy()))
+                im.seek(i)
+        except EOFError:
+            pass
+
+        try:
+            self.delay = im.info['duration']
+        except:
+            self.delay = 100
+
+        if len(self.frames) == 1:
+            self.config(image=self.frames[0])
+        else:
+            self.next_frame()
+
+    def unload(self):
+        self.config(image="")
+        self.frames = None
+
+    def next_frame(self):
+        if self.frames:
+            self.loc += 1
+            self.loc %= len(self.frames)
+            self.config(image=self.frames[self.loc])
+            self.after(self.delay, self.next_frame)
+
+
 
 def browse_file():
     global t_id
@@ -250,7 +288,6 @@ def forward():
 
 
 def rewind_music():
-    global progress_bar
     stop_music()
     time.sleep(1)
     x1 = rewind()
@@ -262,9 +299,6 @@ def rewind_music():
         play_it = playlist[x1-1]
         select_PL(track_id_list[x1-1])
 
-
-    progress_bar['value'] = 0.0
-    progress_bar.update()
     mixer.music.load(play_it)
     mixer.music.play()
     statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
@@ -272,7 +306,6 @@ def rewind_music():
 
 
 def forward_music():
-    global progres_bar
     stop_music()
     time.sleep(1)
     x1 = forward()
@@ -284,10 +317,6 @@ def forward_music():
     else:
         play_it = playlist[x1 + 1]
         select_PL(track_id_list[x1+1])
-
-
-    progress_bar['value'] = 0.0
-    progress_bar.update()
     mixer.music.load(play_it)
     mixer.music.play()
     statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
@@ -340,6 +369,7 @@ def del_song():
     track_id_list.pop(selected_song)
     statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
     show_details(play_it)
+
 
 def show_details(play_song):
     file_data = os.path.splitext(play_song)
@@ -455,14 +485,19 @@ scrollbar.pack(side="right", fill="y")
 playlistbox.config(yscrollcommand=scrollbar.set)
 
 #icons
-os.chdir('C:\\Users\\Admin\\Desktop\\icons')
-photo_play = PhotoImage(file = 'playbtn.png')
+os.chdir('C:\\Users\\PCROOM\\OneDrive\\Desktop\\cute_icons')
 photo_stop = PhotoImage(file = 'stopbtn.png')
 photo_pause = PhotoImage(file = 'pausebtn.png')
 photo_restart = PhotoImage(file = 'restartbtn.png')
 photo_rewind = PhotoImage(file = 'rewindbtn.png')
 photo_forward = PhotoImage(file = 'forwardbtn.png')
 photo_mute = PhotoImage(file = 'audiobtn.png')
+photo_play = PhotoImage(file = 'playbtn.png')
+gif = PhotoImage(file = 'discoball.gif')
+
+gif1 = ImageLabel(topframe)
+gif1.pack()
+gif1.load('the_gif.gif')
 
 #bottons
 addBtn = ttk.Button(leftframe, text="+ Add Song", command=browse_file)
@@ -513,6 +548,8 @@ lengthlabel.pack(pady=5)
 
 currenttimelabel = ttk.Label(topframe, text='Current Time : --:--', relief=GROOVE)
 currenttimelabel.pack()
+
+
 
 
 
