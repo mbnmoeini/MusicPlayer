@@ -313,8 +313,8 @@ def forward_music():
     stop_music()
     time.sleep(1)
     x1 = forward()
-    print(playlist)
-    print(track_id_list)
+    #print(playlist)
+    #print(track_id_list)
     if x1 == (len(playlist) - 1):
         play_it = playlist[0]
         select_PL(track_id_list[0])
