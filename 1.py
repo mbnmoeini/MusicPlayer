@@ -454,6 +454,15 @@ scrollbar = Scrollbar(leftframe, orient="vertical",command=playlistbox.yview)
 scrollbar.pack(side="right", fill="y")
 playlistbox.config(yscrollcommand=scrollbar.set)
 
+#icons
+os.chdir('C:\\Users\\Admin\\Desktop\\icons')
+photo_play = PhotoImage(file = 'playbtn.png')
+photo_stop = PhotoImage(file = 'stopbtn.png')
+photo_pause = PhotoImage(file = 'pausebtn.png')
+photo_restart = PhotoImage(file = 'restartbtn.png')
+photo_rewind = PhotoImage(file = 'rewindbtn.png')
+photo_forward = PhotoImage(file = 'forwardbtn.png')
+photo_mute = PhotoImage(file = 'audiobtn.png')
 
 #bottons
 addBtn = ttk.Button(leftframe, text="+ Add Song", command=browse_file)
@@ -465,25 +474,25 @@ delBtn.pack(side=LEFT)
 btnload = ttk.Button(leftframe, text="select folder", command=Load)
 btnload.pack(side=LEFT)
 
-playBtn = ttk.Button(middleframe, text = 'play', command=play_music)
+playBtn = ttk.Button(middleframe, image = photo_play, command=play_music)
 playBtn.grid(row=0, column=0, padx=3)
 
-stopBtn = ttk.Button(middleframe, text = 'stop', command=stop_music)
+stopBtn = ttk.Button(middleframe, image = photo_stop, command=stop_music)
 stopBtn.grid(row=0, column=1, padx=3)
 
-pauseBtn = ttk.Button(middleframe,text = 'pause', command=pause_music)
+pauseBtn = ttk.Button(middleframe,image = photo_pause, command=pause_music)
 pauseBtn.grid(row=0, column=2, padx=3)
 
-restartBtn = ttk.Button(bottomframe, text = 'restart', command=restart_music)
+restartBtn = ttk.Button(bottomframe, image = photo_restart, command=restart_music)
 restartBtn.grid(row=0, column=0)
 
-rewindBtn = ttk.Button(bottomframe, text ='Prev', command=rewind_music)
+rewindBtn = ttk.Button(bottomframe, image = photo_rewind, command=rewind_music)
 rewindBtn.grid(row=0, column=1)
 
-forwardBtn = ttk.Button(bottomframe, text = 'Next', command=forward_music)
+forwardBtn = ttk.Button(bottomframe, image = photo_forward, command=forward_music)
 forwardBtn.grid(row=0, column=2)
 
-volumeBtn = ttk.Button(bottomframe, text = 'Mute', command=mute_music)
+volumeBtn = ttk.Button(bottomframe, image = photo_mute, command=mute_music)
 volumeBtn.grid(row=0, column=3)
 
 global progress_bar
@@ -504,8 +513,6 @@ lengthlabel.pack(pady=5)
 
 currenttimelabel = ttk.Label(topframe, text='Current Time : --:--', relief=GROOVE)
 currenttimelabel.pack()
-
-
 
 
 
