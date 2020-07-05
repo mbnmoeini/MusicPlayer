@@ -505,7 +505,7 @@ photo_rewind = PhotoImage(file = 'rewindbtn.png')
 photo_forward = PhotoImage(file = 'forwardbtn.png')
 photo_mute = PhotoImage(file = 'audiobtn.png')
 photo_play = PhotoImage(file = 'playbtn.png')
-gif = PhotoImage(file = 'discoball.gif')
+gif = PhotoImage(file = 'the_gif.gif')
 
 gif1 = ImageLabel(topframe)
 gif1.pack()
