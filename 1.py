@@ -522,7 +522,7 @@ forwardBtn.grid(row=0, column=2)
 volumeBtn = ttk.Button(bottomframe, image = photo_mute, command=mute_music)
 volumeBtn.grid(row=0, column=3)
 
-global progress_bar
+
 progress_bar = ttk.Progressbar(root, orient='horizontal',length=300)
 progress_bar.place(x=100,y=100)
 progress_bar.pack()
