@@ -5,6 +5,7 @@ bottoms(play, pause, stop, next, prev ,repeat, mute, add song, del song, add fol
 volume scaler, labels to show statuses, progress bar, moving design, menubar, statusbar,...)
 
 Authors : Yasamin Abdi, Mobina Moeini
+
 Essential modules to run are as follows:
 Tkinter
 Sqlite3
