@@ -220,7 +220,7 @@ def Load():
 
 def play_music():
     global paused
-
+    global progress_bar
     if paused:
         mixer.music.unpause()
         statusbar['text'] = "Music Resumed"
@@ -232,6 +232,8 @@ def play_music():
             selected_song = playlistbox.curselection()
             selected_song = int(selected_song[0])
             play_it = playlist[selected_song]   #plylist gets the index of the selected song and returns its path
+            progress_bar['value'] = 0.0
+            progress_bar.update()
             #######
             #print(selected_song)
             #print (playlist[selected_song])
