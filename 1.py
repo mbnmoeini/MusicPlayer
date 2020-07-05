@@ -262,6 +262,11 @@ def pause_music():
 
 
 def restart_music():
+    global progress_bar
+    mixer.music.stop()
+    time.sleep(1)
+    progress_bar['value'] = 0.0
+    progress_bar.update()
     play_music()
     statusbar['text'] = "Music Restarted"
 
@@ -356,12 +361,27 @@ def add_to_playlist(filename):
 
 
 def del_song():
+    global progress_bar
     selected_song = playlistbox.curselection()
     selected_song = int(selected_song[0])
+    mixer.music.stop()
+    time.sleep(1)
+    x2 = forward()
+    if x2 == (len(playlist) - 1):
+        play_it = playlist[0]
+        select_PL(track_id_list[0])
+    else:
+        play_it = playlist[x2 + 1]
+        select_PL(track_id_list[x2 + 1])
+    progress_bar['value'] = 0.0
+    progress_bar.update()
+    mixer.music.load(play_it)
+    mixer.music.play()
     playlistbox.delete(selected_song)
     playlist.pop(selected_song)
     track_id_list.pop(selected_song)
-
+    statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
+    show_details(play_it)
 
 def show_details(play_song):
     file_data = os.path.splitext(play_song)
