@@ -6,7 +6,8 @@ volume scaler), labels to show statuses, progress bar, moving design, menubar, s
 
 Authors : Yasamin Abdi, Mobina Moeini
 
-check out the screenshot : [](https://gofile.io/d/e7ymLp)
+check out the screenshot : 
+https://gofile.io/d/e7ymLp
 
 Essential modules to run are as follows:
 Tkinter,
